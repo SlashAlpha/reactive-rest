@@ -51,24 +51,16 @@ class CustomerControllerTest {
                 .expectHeader().location("http://localhost:8080/api/v2/customer/4");
 
     }
-    public static Customer getTestCustomer(){
-        return Customer.builder()
-                .customerName("Slash")
-                .build();
-
-    }
-
     @Test
     @Order(3)
-    void updateBeerById() {
+    void updateCustomerById() {
         webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID,1)
                 .body(Mono.just(getTestCustomer()),CustomerDTO.class)
                 .header("Content-type","application/json")
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
     }
-
     @Test
     @Order(4)
     void patchCustomerById() {
@@ -80,10 +72,88 @@ class CustomerControllerTest {
     }
 
     @Test
-    @Order(5)
+    @Order(7)
     void deleteCustomerById() {
-        webTestClient.delete().uri(CustomerController.CUSTOMER_PATH_ID,1)
+        webTestClient.delete().uri(CustomerController.CUSTOMER_PATH_ID,2)
                 .exchange()
                 .expectStatus().isNoContent();
+    }
+
+    public static Customer getTestCustomer(){
+        return Customer.builder()
+                .customerName("Slash")
+                .build();
+
+    }
+
+    @Test
+    @Order(10)
+    void updateCustomerByIdBadData() {
+        Customer customerTest=getTestCustomer();
+        customerTest.setCustomerName("");
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID,1)
+                .body(Mono.just(customerTest),CustomerDTO.class)
+                .header("Content-type","application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+    @Test
+    @Order(11)
+    void updateCustomerByIdNotFound() {
+        webTestClient.put().uri(CustomerController.CUSTOMER_PATH_ID,999)
+                .body(Mono.just(getTestCustomer()),CustomerDTO.class)
+                .header("Content-type","application/json")
+                .exchange()
+                .expectStatus().isNotFound();
+
+    }
+
+
+
+
+
+    @Test
+    @Order(13)
+    void createNewCustomerBadData() {
+        Customer customerTest=getTestCustomer();
+        customerTest.setCustomerName("");
+        webTestClient.post().uri(CustomerController.CUSTOMER_PATH)
+                .body(Mono.just(customerTest),CustomerDTO.class)
+                .header("Content-type","application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+    }
+
+
+
+
+    @Test
+    @Order(14)
+    void patchCustomerByIdBadData() {
+        Customer customerTest=getTestCustomer();
+        customerTest.setCustomerName("");
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID,1)
+                .body(Mono.just(customerTest),CustomerDTO.class)
+                .header("Content-type","application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+    @Test
+    @Order(15)
+    void patchCustomerByIdNotFound() {
+        webTestClient.patch().uri(CustomerController.CUSTOMER_PATH_ID,999)
+                .body(Mono.just(getTestCustomer()),CustomerDTO.class)
+                .header("Content-type","application/json")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+ 
+    void deleteCustomerByIdNotFound() {
+        webTestClient.delete().uri(CustomerController.CUSTOMER_PATH_ID,999)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 }
